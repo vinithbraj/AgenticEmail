@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 const App = () => {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState('Generate an email response');
+  const [tone, setTone] = useState('professional'); // Default tone
 
   const handleGenerateReply = async () => {
     try {
@@ -23,8 +24,7 @@ const App = () => {
       }
       
       console.log('Selected text:', selectedText);
-      console.log('Prompt:', prompt);
-
+          
       if (!prompt.trim()) {
         alert('Please enter a prompt');
         return;
@@ -37,8 +37,8 @@ const App = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: prompt,
-          email: selectedText
+          email: selectedText,
+          tone: tone
         }),
       });
 
@@ -76,6 +76,27 @@ const App = () => {
           style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
           placeholder="Enter your prompt here"
         />
+      </div>
+      <div style={{ marginBottom: '12px' }}>
+        <label htmlFor="tone" style={{ display: 'block', marginBottom: '4px' }}>
+          Tone:
+        </label>
+        <select
+          id="tone"
+          value={tone}
+          onChange={(e) => setTone(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            boxSizing: 'border-box',
+            borderRadius: '4px',
+            border: '1px solid #ccc'
+          }}
+        >
+          <option value="professional">Professional</option>
+          <option value="polite">Polite</option>
+          <option value="friendly">Friendly</option>
+        </select>
       </div>
       <button
         onClick={handleGenerateReply}
