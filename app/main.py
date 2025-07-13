@@ -26,10 +26,12 @@ Generate an email response using a "{tone}" tone.
 Your goal is to:
 -- {action_instruction}
 
-Limit the response to {char_limit} characters.
+Limit the response to:
+-- {char_limit} characters.
 
 Here is the email to which the reply must be generated:
 -- {email}
+
 """.strip()
 
 app = FastAPI()
