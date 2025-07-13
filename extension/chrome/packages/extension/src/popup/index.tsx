@@ -15,7 +15,7 @@ import { createRoot } from 'react-dom/client';
 const App = () => {
   const [prompt, setPrompt] = useState('Generate an email response');
   const [tone, setTone] = useState('professional'); // Default tone
-  const [charLimit, setCharLimit] = useState('1000'); // Default character limit
+  const [charLimit, setCharLimit] = useState('250'); // Default character limit
 
   const handleGenerateReply = async () => {
     try {
@@ -136,6 +136,7 @@ const App = () => {
             border: '1px solid #ccc'
           }}
         >
+          <option value="250">250 characters</option>
           <option value="500">500 characters</option>
           <option value="1000">1000 characters</option>
           <option value="2000">2000 characters</option>
