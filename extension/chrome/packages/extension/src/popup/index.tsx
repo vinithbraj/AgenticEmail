@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 const App = () => {
   const [prompt, setPrompt] = useState('Generate an email response');
   const [tone, setTone] = useState('professional'); // Default tone
+  const [charLimit, setCharLimit] = useState('1000'); // Default character limit
 
   const handleGenerateReply = async () => {
     try {
@@ -37,8 +38,10 @@ const App = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action_instruction: prompt,
           email: selectedText,
-          tone: tone
+          tone: tone,
+          char_limit: parseInt(charLimit)
         }),
       });
 
@@ -66,7 +69,7 @@ const App = () => {
       <h2>Email Reply Generator</h2>
       <div style={{ marginBottom: '12px' }}>
         <label htmlFor="prompt" style={{ display: 'block', marginBottom: '4px' }}>
-          Prompt:
+          Instructions:
         </label>
         <input
           id="prompt"
@@ -74,7 +77,7 @@ const App = () => {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          placeholder="Enter your prompt here"
+          placeholder="Enter your instructions here"
         />
       </div>
       <div style={{ marginBottom: '12px' }}>
@@ -96,6 +99,35 @@ const App = () => {
           <option value="professional">Professional</option>
           <option value="polite">Polite</option>
           <option value="friendly">Friendly</option>
+          <option value="confirm">Confirm</option>
+          <option value="decline">Decline</option>
+          <option value="reschedule">Reschedule</option>
+          <option value="accept">Accept</option>
+          <option value="reject">Reject</option>
+          <option value="acknowledge">Acknowledge</option>
+          <option value="apologize">Apologize</option>
+          <option value="request information">Request Information</option>
+        </select>
+      </div>
+      <div style={{ marginBottom: '12px' }}>
+        <label htmlFor="charLimit" style={{ display: 'block', marginBottom: '4px' }}>
+          Character Limit:
+        </label>
+        <select
+          id="charLimit"
+          value={charLimit}
+          onChange={(e) => setCharLimit(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            boxSizing: 'border-box',
+            borderRadius: '4px',
+            border: '1px solid #ccc'
+          }}
+        >
+          <option value="500">500 characters</option>
+          <option value="1000">1000 characters</option>
+          <option value="2000">2000 characters</option>
         </select>
       </div>
       <button
