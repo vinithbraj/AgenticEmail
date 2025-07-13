@@ -12,3 +12,30 @@
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'GENERATE_EMAIL') {
+    const { payload } = message;
+
+    // Start async work inside IIFE
+    (async () => {
+      try {
+        const res = await fetch('http://localhost:8000/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        sendResponse({ data }); // Send back result
+      } catch (err) {
+        console.error(err);
+        sendResponse({
+          error: err instanceof Error ? err.message : String(err)
+        });
+      }
+    })();
+
+    return true; // ✅ Keeps response channel open
+  }
+});

@@ -31,43 +31,38 @@ const App = () => {
       const selectedText = result.result as string;
       
       if (!selectedText) {
-        alert('An email was not selected');
+        alert('An snippet of text for email response was not selected');
         return;
       }
       
-      console.log('Selected text:', selectedText);
-          
       if (!prompt.trim()) {
-        alert('Please enter a prompt');
+        alert('Appropriate instructions for email response were not provided');
         return;
       }
       
-      // Make API request to localhost server
-      const response = await fetch('http://localhost:8000/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action_instruction: prompt,
-          email: selectedText,
-          tone: tone,
-          char_limit: parseInt(charLimit)
-        }),
+      const payload = {
+        action_instruction: prompt,
+        email: selectedText,
+        tone: tone,
+        char_limit: parseInt(charLimit)
+      };
+  
+      // Send message to background script
+      chrome.runtime.sendMessage({ type: 'GENERATE_EMAIL', payload }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          alert('Failed to contact background script.');
+          return;
+        }
+  
+        if (response?.error) {
+          alert(`Error: ${response.error}`);
+        } else if (response?.data?.response) {
+          alert(response.data.response);
+        } else {
+          alert('No response received from the server.');
+        }
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Show the response in an alert
-      if (data.response) {
-        alert(data.response);
-      } else {
-        alert('No response received from the server');
-      }
       
     } catch (error) {
       console.error('Error:', error);
