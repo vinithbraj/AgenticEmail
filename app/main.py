@@ -9,6 +9,7 @@ You should have received a copy of the MIT License along with this program.
 If not, see <https://opensource.org/licenses/MIT>.
 """
 
+from time import sleep
 from fastapi import FastAPI, Request
 import requests
 import json
@@ -19,7 +20,7 @@ import os
 load_dotenv()
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-MODEL_NAME = os.getenv("MODEL_NAME", "phi3")
+MODEL_NAME = os.getenv("MODEL_NAME", "mistral")
 DEFAULT_PROMPT = """
 Generate an email response using a "{tone}" tone.
 
@@ -29,9 +30,10 @@ Your goal is to:
 Limit the response to:
 -- {char_limit} characters.
 
+Only generate a single email. Do not provide examples, alternatives, or additional suggestions. Do not explain your reasoning or wrap the output in commentary.
+
 Here is the email to which the reply must be generated:
 -- {email}
-
 """.strip()
 
 app = FastAPI()
@@ -50,6 +52,7 @@ async def generate_email(request: Request):
 
     # Format the prompt with variables and combine with email body
     formatted_prompt = DEFAULT_PROMPT.format(tone=tone, action_instruction=action_instruction, char_limit=char_limit, email=email_body.strip())
+
 
     print(formatted_prompt)
 

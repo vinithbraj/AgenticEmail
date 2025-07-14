@@ -1,0 +1,158 @@
+/* Main container */
+.popup-container {
+  width: 400px;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+}
+
+/* Loading state */
+.loading-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.loading-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3498db;
+  font-size: 24px;
+}
+
+.loading-text {
+  margin-bottom: 4px;
+}
+
+.timer {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Error container */
+.error-container {
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Error message */
+.error-message {
+  color: #721c24;
+  margin: 0;
+}
+
+.error-container .clear-button {
+  align-self: flex-end;
+  margin-top: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+textarea, select, input[type="range"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.generate-button {
+  background-color: #4CAF50;
+  color: white;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 16px;
+}
+
+.generate-button:hover {
+  background-color: #45a049;
+}
+
+.action-button {
+  min-width: 60px;
+  padding: 4px 8px;
+  color: white;
+}
+
+.copy-button {
+  background-color: #3498db;
+}
+
+.clear-button {
+  background-color: #e74c3c;
+}
+
+/* Response section */
+.response-container {
+  margin: 20px 0;
+}
+
+.response-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.actions-container {
+  display: flex;
+  gap: 8px;
+}
+
+.response-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.generation-time {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: 4px;
+}
