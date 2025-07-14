@@ -22,9 +22,12 @@ load_dotenv()
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 MODEL_NAME = os.getenv("MODEL_NAME", "mistral")
 DEFAULT_PROMPT = """
-Generate an email response using a "{tone}" tone.
+You are an email response generator.
 
 Your goal is to:
+-- Generate an email response using a "{tone}" tone.
+
+Additional optional instructions include 
 -- {action_instruction}
 
 Limit the response to:
