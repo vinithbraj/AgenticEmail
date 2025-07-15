@@ -13,31 +13,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import './popup.css';
 
-interface TimingInfo {
-  startTime: number;
-  endTime: number;
-  duration: number; // in seconds
-}
-
-interface FormState {
-  prompt: string;
-  tone: string;
-  charLimit: string;
-}
-
-interface StorageResponse {
-  data?: {
-    response: string;
-  };
-  response: string;
-  error?: string;
-  timestamp: number;
-  isLoading?: boolean;
-  timing?: TimingInfo;
-  formState?: FormState;
-}
-
-const STORAGE_KEY = 'agenticEmailResponse';
+import { StorageResponse, STORAGE_KEY, FormState, TimingInfo } from '../shared/types';
 
 const App = () => {
   const [prompt, setPrompt] = useState('');

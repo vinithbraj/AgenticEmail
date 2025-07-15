@@ -9,12 +9,11 @@
  * If not, see <https://opensource.org/licenses/MIT>.
  */
 
+import { STORAGE_KEY, StorageResponse } from '../shared/types';
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
 });
-
-// Store to keep track of the latest response
-const STORAGE_KEY = 'agenticEmailResponse';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GENERATE_EMAIL') {
@@ -22,16 +21,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const startTime = message.startTime || Date.now();
 
     // Set initial loading state
+    const loadingState: StorageResponse = {
+      isLoading: true,
+      timestamp: startTime,
+      timing: {
+        startTime,
+        endTime: 0,
+        duration: 0
+      },
+      response: '',
+      formState: payload // Store the form state with the request
+    };
+
     chrome.storage.local.set({
-      [STORAGE_KEY]: {
-        isLoading: true,
-        timestamp: startTime,
-        timing: {
-          startTime,
-          endTime: 0,
-          duration: 0
-        }
-      }
+      [STORAGE_KEY]: loadingState
     }).catch(err => console.error('Error setting initial loading state:', err));
 
     // Start async work
@@ -50,36 +53,47 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         const data = await res.json();
         
-        // Store the response in chrome.storage.local with timing info
+        // Create success response with timing info
         const endTime = Date.now();
+        const successResponse: StorageResponse = {
+          data: { response: data.response },
+          response: data.response,
+          timestamp: endTime,
+          isLoading: false,
+          timing: {
+            startTime,
+            endTime,
+            duration: (endTime - startTime) / 1000 // in seconds
+          },
+          formState: payload // Keep the form state
+        };
+        
         await chrome.storage.local.set({
-          [STORAGE_KEY]: {
-            data,
-            timestamp: endTime,
-            isLoading: false, // Clear loading state
-            timing: {
-              startTime: startTime,
-              endTime: endTime,
-              duration: (endTime - startTime) / 1000 // in seconds
-            }
-          }
+          [STORAGE_KEY]: successResponse
         });
         
         console.log('Response stored successfully');
       } catch (err) {
         console.error('Error in background script:', err);
-        // Store the error in storage and clear loading state
+        
+        // Create error response with timing info
+        const errorTime = Date.now();
+        const errorResponse: StorageResponse = {
+          error: err instanceof Error ? err.message : 'Unknown error occurred',
+          response: '',
+          timestamp: errorTime,
+          isLoading: false,
+          timing: {
+            startTime,
+            endTime: errorTime,
+            duration: (errorTime - startTime) / 1000
+          },
+          formState: payload // Keep the form state
+        };
+        
+        // Store the error in storage
         await chrome.storage.local.set({
-          [STORAGE_KEY]: {
-            error: err instanceof Error ? err.message : 'Unknown error occurred',
-            timestamp: Date.now(),
-            isLoading: false,
-            timing: {
-              startTime: startTime,
-              endTime: Date.now(),
-              duration: (Date.now() - startTime) / 1000
-            }
-          }
+          [STORAGE_KEY]: errorResponse
         });
       }
     })();
