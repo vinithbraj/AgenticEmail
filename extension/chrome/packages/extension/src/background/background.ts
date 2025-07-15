@@ -27,15 +27,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       timing: {
         startTime,
         endTime: 0,
-        duration: 0
+        duration: 0,
       },
       response: '',
-      formState: payload // Store the form state with the request
+      formState: payload, // Store the form state with the request
     };
 
-    chrome.storage.local.set({
-      [STORAGE_KEY]: loadingState
-    }).catch(err => console.error('Error setting initial loading state:', err));
+    chrome.storage.local
+      .set({
+        [STORAGE_KEY]: loadingState,
+      })
+      .catch((err) => console.error('Error setting initial loading state:', err));
 
     // Start async work
     (async () => {
@@ -52,7 +54,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         const data = await res.json();
-        
+
         // Create success response with timing info
         const endTime = Date.now();
         const successResponse: StorageResponse = {
@@ -63,19 +65,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           timing: {
             startTime,
             endTime,
-            duration: (endTime - startTime) / 1000 // in seconds
+            duration: (endTime - startTime) / 1000, // in seconds
           },
-          formState: payload // Keep the form state
+          formState: payload, // Keep the form state
         };
-        
+
         await chrome.storage.local.set({
-          [STORAGE_KEY]: successResponse
+          [STORAGE_KEY]: successResponse,
         });
-        
+
         console.log('Response stored successfully');
       } catch (err) {
         console.error('Error in background script:', err);
-        
+
         // Create error response with timing info
         const errorTime = Date.now();
         const errorResponse: StorageResponse = {
@@ -86,18 +88,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           timing: {
             startTime,
             endTime: errorTime,
-            duration: (errorTime - startTime) / 1000
+            duration: (errorTime - startTime) / 1000,
           },
-          formState: payload // Keep the form state
+          formState: payload, // Keep the form state
         };
-        
+
         // Store the error in storage
         await chrome.storage.local.set({
-          [STORAGE_KEY]: errorResponse
+          [STORAGE_KEY]: errorResponse,
         });
       }
     })();
-    
+
     // Return true to indicate we'll send the response asynchronously
     return true;
   }

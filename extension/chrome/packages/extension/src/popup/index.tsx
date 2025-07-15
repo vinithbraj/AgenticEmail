@@ -9,11 +9,11 @@
  * If not, see <https://opensource.org/licenses/MIT>.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './popup.css';
 
-import { StorageResponse, STORAGE_KEY, FormState, TimingInfo, EmailGenerationPayload } from '../shared/types';
+import { EmailGenerationPayload, STORAGE_KEY, StorageResponse } from '../shared/types';
 
 const App = () => {
   const [prompt, setPrompt] = useState('');
@@ -40,7 +40,7 @@ const App = () => {
   // Update storage with current elapsed time periodically
   useEffect(() => {
     if (!isLoading || !generationStartTime) return;
-    
+
     const updateStorage = async () => {
       try {
         const storageData: StorageResponse = {
@@ -48,13 +48,13 @@ const App = () => {
           timing: {
             startTime: generationStartTime,
             endTime: Date.now(),
-            duration: (Date.now() - generationStartTime) / 1000
+            duration: (Date.now() - generationStartTime) / 1000,
           },
           timestamp: Date.now(),
-          response: ''
+          response: '',
         };
         await chrome.storage.local.set({
-          [STORAGE_KEY]: storageData
+          [STORAGE_KEY]: storageData,
         });
       } catch (err) {
         console.error('Error updating storage:', err);
@@ -71,18 +71,18 @@ const App = () => {
     const formState = {
       prompt,
       tone,
-      charLimit
+      charLimit,
     };
-    
+
     try {
       const currentData = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY] || {};
       const storageData: StorageResponse = {
         ...currentData,
         formState,
-        response: currentData.response || ''
+        response: currentData.response || '',
       };
       await chrome.storage.local.set({
-        [STORAGE_KEY]: storageData
+        [STORAGE_KEY]: storageData,
       });
     } catch (err) {
       console.error('Error saving form state:', err);
@@ -102,10 +102,10 @@ const App = () => {
       try {
         if (!isFirstLoad.current) return;
         isFirstLoad.current = false;
-        
+
         const result = await chrome.storage.local.get(STORAGE_KEY);
         const storedData: StorageResponse | undefined = result[STORAGE_KEY];
-        
+
         if (storedData) {
           // Restore form state
           if (storedData.formState) {
@@ -121,10 +121,10 @@ const App = () => {
             setElapsedTime(elapsed);
             setGenerationStartTime(storedData.timing.startTime);
             setIsLoading(true);
-            
+
             // Start the timer from the persisted time
             const interval = window.setInterval(() => {
-              setElapsedTime(prev => (Date.now() - (storedData.timing?.startTime || now)) / 1000);
+              setElapsedTime((prev) => (Date.now() - (storedData.timing?.startTime || now)) / 1000);
             }, 100);
             setTimerInterval(interval);
           } else if (storedData.error) {
@@ -143,15 +143,15 @@ const App = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadStoredState();
-    
+
     // Handle events from different sources
     const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       try {
         if (changes[STORAGE_KEY]?.newValue) {
           const newData: StorageResponse = changes[STORAGE_KEY].newValue;
-          
+
           if (newData.isLoading) {
             setIsLoading(true);
             setResponse(null);
@@ -176,7 +176,7 @@ const App = () => {
         setIsLoading(false);
       }
     };
-    
+
     chrome.storage.onChanged.addListener(handleStorageChange);
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
@@ -186,70 +186,74 @@ const App = () => {
   const handleGenerateReply = async () => {
     try {
       // Get the current active tab
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
       // Execute script to get selected text in the active tab
       const [result] = await chrome.scripting.executeScript({
         target: { tabId: tab.id! },
-        func: () => window.getSelection()?.toString().trim() || ''
+        func: () => window.getSelection()?.toString().trim() || '',
       });
 
       const selectedText = result.result as string;
-      
+
       if (!selectedText) {
         throw new Error('A snippet of text for email response was not selected');
       }
-      
+
       if (!prompt.trim()) {
         throw new Error('Please provide instructions for the email response.');
       }
-      
+
       // Reset states and set loading state in storage
       setResponse(null);
       setError(null);
       setGenerationTime(null);
       setIsLoading(true);
-      
+
       // Store the start time
       const startTime = Date.now();
       setGenerationStartTime(startTime);
-      
+
       // Start the timer
       const interval = window.setInterval(() => {
-        setElapsedTime(prev => (Date.now() - startTime) / 1000);
+        setElapsedTime((prev) => (Date.now() - startTime) / 1000);
       }, 100);
       setTimerInterval(interval);
 
       // Save initial loading state with timing info
       const storageData: StorageResponse = {
         isLoading: true,
-        timing: { 
+        timing: {
           startTime,
           endTime: Date.now(),
-          duration: 0
+          duration: 0,
         },
         timestamp: Date.now(),
-        response: ''
+        response: '',
       };
       await chrome.storage.local.set({
-        [STORAGE_KEY]: storageData
+        [STORAGE_KEY]: storageData,
       });
-      
+
       const payload: EmailGenerationPayload = {
         action_instruction: prompt,
         email: selectedText,
         tone: tone,
-        char_limit: parseInt(charLimit)
+        char_limit: parseInt(charLimit),
       };
-  
+
       // Send message to background script (don't clear storage here - we want to keep loading state)
       chrome.runtime.sendMessage({ type: 'GENERATE_EMAIL', payload });
-      
     } catch (error) {
       console.error('Error:', error);
       setIsLoading(false);
       // Show the actual error message if available, otherwise show a generic message
-      setError(error instanceof Error ? error.message : 'An error occurred while processing your request');
+      setError(
+        error instanceof Error ? error.message : 'An error occurred while processing your request'
+      );
     }
   };
 
@@ -268,17 +272,17 @@ const App = () => {
     try {
       // Save the current form state before clearing
       const formState = { prompt, tone, charLimit };
-      
+
       await chrome.storage.local.set({
         [STORAGE_KEY]: {
           data: null,
           error: null,
           isLoading: false,
           timing: null,
-          formState
-        }
+          formState,
+        },
       });
-      
+
       setResponse(null);
       setError(null);
       setGenerationTime(null);
@@ -298,9 +302,7 @@ const App = () => {
         <div className="loading-container">
           <div className="loading-icon">⏳</div>
           <p className="loading-text">Generating your response...</p>
-          <div className="timer">
-            {elapsedTime.toFixed(1)} seconds elapsed
-          </div>
+          <div className="timer">{elapsedTime.toFixed(1)} seconds elapsed</div>
         </div>
       </div>
     );
@@ -312,10 +314,8 @@ const App = () => {
       <h2>Email Reply Generator</h2>
       {error && (
         <div className="error-container">
-          <div className="error-message">
-            Error: {error}
-          </div>
-          <button 
+          <div className="error-message">Error: {error}</div>
+          <button
             className="action-button clear-button"
             onClick={clearResponse}
             title="Clear error"
@@ -337,21 +337,17 @@ const App = () => {
               rows={4}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="tone">Tone:</label>
-            <select
-              id="tone"
-              value={tone}
-              onChange={(e) => setTone(e.target.value)}
-            >
+            <select id="tone" value={tone} onChange={(e) => setTone(e.target.value)}>
               <option value="professional">Professional</option>
               <option value="friendly">Friendly</option>
               <option value="casual">Casual</option>
               <option value="formal">Formal</option>
             </select>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="charLimit">Character Limit: {charLimit}</label>
             <input
@@ -364,12 +360,12 @@ const App = () => {
               onChange={(e) => setCharLimit(e.target.value)}
             />
           </div>
-          
+
           <button
             className="generate-button"
             onClick={handleGenerateReply}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
+            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
           >
             Generate Reply
           </button>
@@ -381,14 +377,14 @@ const App = () => {
           <div className="response-header">
             <h3>Generated Response:</h3>
             <div className="actions-container">
-              <button 
+              <button
                 className="action-button copy-button"
                 onClick={copyToClipboard}
                 title="Copy to clipboard"
               >
                 Copy
               </button>
-              <button 
+              <button
                 className="action-button clear-button"
                 onClick={clearResponse}
                 title="Clear response"
@@ -403,9 +399,7 @@ const App = () => {
             onChange={(e) => setResponse(e.target.value)}
           />
           {generationTime !== null && (
-            <div className="generation-time">
-              Generated in {generationTime.toFixed(2)} seconds
-            </div>
+            <div className="generation-time">Generated in {generationTime.toFixed(2)} seconds</div>
           )}
         </div>
       )}

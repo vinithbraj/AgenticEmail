@@ -1,0 +1,14 @@
+{
+  "name": "agentic-email",
+  "version": "1.0.0",
+  "description": "Agentic Email Chrome Extension",
+  "scripts": {
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "prebuild": "npm run format",
+    "build": "echo \"Build script will go here\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.4",
+    "prettier-plugin-organize-imports": "^3.1.0"
+  }
+}
