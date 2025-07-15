@@ -98,7 +98,7 @@ async def lifespan(app: FastAPI):
     ollama_process = subprocess.Popen([OLLAMA_PATH, "serve"])
     print(f"Ollama serve started with PID {ollama_process.pid}")
     print("Pulling model...")
-    subprocess.run([OLLAMA_PATH, "pull", "phi3"], check=True)
+    pull_model()
 
     yield  # 👈 your app runs here
 
@@ -147,7 +147,12 @@ async def generate_email(request: Request):
     email_body = data.get("email", "")
 
     # Format the prompt with variables and combine with email body
+    print("Generating email response...------------------------------------------")   
+    print(MODEL_NAME)
     formatted_prompt = DEFAULT_PROMPT.format(tone=tone, action_instruction=action_instruction, char_limit=char_limit, email=email_body.strip())
+
+    sleep(5)
+    return {"response": "Hello world"}
 
     response = requests.post(
         f"{OLLAMA_HOST}/api/generate",
