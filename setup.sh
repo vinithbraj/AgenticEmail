@@ -31,23 +31,10 @@ else
   echo -e "${GREEN}✅ Ollama is already installed.${RESET}"
 fi
 
-# Step 4: Install pnpm if not installed
-if ! command -v pnpm &> /dev/null; then
-  echo -e "${GREEN}Installing pnpm...${RESET}"
-  brew install pnpm
-else
-  echo -e "${GREEN}✅ pnpm is already installed.${RESET}"
-fi
+sudo chown -R $(whoami) /usr/local/lib/node_modules /usr/local/bin /usr/local/share
+npm install -g pnpm
 
-# Step 5: Install node if not installed
-if ! command -v node &> /dev/null; then
-  echo -e "${GREEN}Installing Node.js...${RESET}"
-  brew install node
-else
-  echo -e "${GREEN}✅ Node.js is already installed.${RESET}"
-fi
-
-# Step 6: Create virtual environment
+# Step 4: Create virtual environment
 PYTHON_BIN=$(which python3)
 VENV_DIR="venv"
 
@@ -58,11 +45,11 @@ else
   echo -e "${GREEN}✅ Virtual environment already exists.${RESET}"
 fi
 
-# Step 7: Activate virtual environment
+# Step 5: Activate virtual environment
 echo -e "${GREEN}Activating virtual environment...${RESET}"
 source $VENV_DIR/bin/activate
 
-# Step 8: Ensure pip is available (even if broken or missing)
+# Step 6: Ensure pip is available (even if broken or missing)
 echo -e "${GREEN}Ensuring pip is functional...${RESET}"
 
 # Fully resolve the path to the Python binary inside the venv
