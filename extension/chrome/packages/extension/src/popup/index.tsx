@@ -43,13 +43,12 @@ const App = () => {
     
     const updateStorage = async () => {
       try {
-        const currentElapsed = (Date.now() - generationStartTime) / 1000;
         const storageData: StorageResponse = {
           isLoading: true,
           timing: {
             startTime: generationStartTime,
             endTime: Date.now(),
-            duration: currentElapsed
+            duration: (Date.now() - generationStartTime) / 1000
           },
           timestamp: Date.now(),
           response: ''
@@ -147,6 +146,7 @@ const App = () => {
     
     loadStoredState();
     
+    // Handle events from different sources
     const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       try {
         if (changes[STORAGE_KEY]?.newValue) {
