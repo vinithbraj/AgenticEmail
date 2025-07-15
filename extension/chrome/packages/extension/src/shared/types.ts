@@ -26,4 +26,11 @@ export interface StorageResponse {
   formState?: FormState;
 }
 
+export interface EmailGenerationPayload {
+  action_instruction: string;
+  email: string;
+  tone: string;
+  char_limit: number;
+}
+
 export const STORAGE_KEY = 'agenticEmailResponse';

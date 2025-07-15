@@ -13,7 +13,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import './popup.css';
 
-import { StorageResponse, STORAGE_KEY, FormState, TimingInfo } from '../shared/types';
+import { StorageResponse, STORAGE_KEY, FormState, TimingInfo, EmailGenerationPayload } from '../shared/types';
 
 const App = () => {
   const [prompt, setPrompt] = useState('');
@@ -44,16 +44,18 @@ const App = () => {
     const updateStorage = async () => {
       try {
         const currentElapsed = (Date.now() - generationStartTime) / 1000;
+        const storageData: StorageResponse = {
+          isLoading: true,
+          timing: {
+            startTime: generationStartTime,
+            endTime: Date.now(),
+            duration: currentElapsed
+          },
+          timestamp: Date.now(),
+          response: ''
+        };
         await chrome.storage.local.set({
-          [STORAGE_KEY]: {
-            isLoading: true,
-            timing: {
-              startTime: generationStartTime,
-              elapsedTime: currentElapsed,
-              duration: currentElapsed
-            },
-            timestamp: Date.now()
-          }
+          [STORAGE_KEY]: storageData
         });
       } catch (err) {
         console.error('Error updating storage:', err);
@@ -75,11 +77,13 @@ const App = () => {
     
     try {
       const currentData = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY] || {};
+      const storageData: StorageResponse = {
+        ...currentData,
+        formState,
+        response: currentData.response || ''
+      };
       await chrome.storage.local.set({
-        [STORAGE_KEY]: {
-          ...currentData,
-          formState
-        }
+        [STORAGE_KEY]: storageData
       });
     } catch (err) {
       console.error('Error saving form state:', err);
@@ -217,18 +221,21 @@ const App = () => {
       setTimerInterval(interval);
 
       // Save initial loading state with timing info
+      const storageData: StorageResponse = {
+        isLoading: true,
+        timing: { 
+          startTime,
+          endTime: Date.now(),
+          duration: 0
+        },
+        timestamp: Date.now(),
+        response: ''
+      };
       await chrome.storage.local.set({
-        [STORAGE_KEY]: {
-          isLoading: true,
-          timing: { 
-            startTime,
-            elapsedTime: 0
-          },
-          timestamp: Date.now()
-        }
+        [STORAGE_KEY]: storageData
       });
       
-      const payload = {
+      const payload: EmailGenerationPayload = {
         action_instruction: prompt,
         email: selectedText,
         tone: tone,
