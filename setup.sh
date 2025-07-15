@@ -47,11 +47,26 @@ fi
 echo -e "${GREEN}Activating virtual environment...${RESET}"
 source $VENV_DIR/bin/activate
 
-# Step 5: Upgrade pip and install project dependencies
+# Step 5: Ensure pip is available (even if broken or missing)
+echo -e "${GREEN}Ensuring pip is functional...${RESET}"
+
+# Fully resolve the path to the Python binary inside the venv
+PYTHON_IN_VENV="$VENV_DIR/bin/python"
+
+# Check if pip works inside the virtual environment
+if ! $PYTHON_IN_VENV -m pip --version &> /dev/null; then
+  echo -e "${GREEN}pip is missing or broken in the virtual environment. Installing with get-pip.py...${RESET}"
+  curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+  $PYTHON_IN_VENV get-pip.py
+  rm get-pip.py
+else
+  echo -e "${GREEN}✅ pip is working in the virtual environment.${RESET}"
+fi
+
 echo -e "${GREEN}Upgrading pip...${RESET}"
-pip install --upgrade pip
+$PYTHON_IN_VENV -m pip install --upgrade pip
 
 echo -e "${GREEN}Installing Python dependencies from requirements.txt...${RESET}"
-pip install -r requirements.txt
+$PYTHON_IN_VENV -m pip install -r requirements.txt
 
 echo -e "${GREEN}✅ All dependencies installed. Environment setup complete!${RESET}"
